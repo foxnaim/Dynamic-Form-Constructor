@@ -1,10 +1,13 @@
 import React from 'react'
+import FormBuilder from './components/FormBuilder/FormBuilder'
 
 
 
 const Home = () => {
   return (
-    <div>page</div>
+    <div>
+      <FormBuilder/>
+    </div>
   )
 }
 

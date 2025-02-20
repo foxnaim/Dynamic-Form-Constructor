@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 
 interface Field {
@@ -14,29 +16,29 @@ interface Field {
 const FormBuilder = () => {
   const [fields, setFields] = useState<Field[]>([]);
 
-  // Загрузка из localStorage
+  
   useEffect(() => {
     const savedFields = localStorage.getItem("formFields");
     if (savedFields) setFields(JSON.parse(savedFields));
   }, []);
 
-  // Сохранение в localStorage
+
   const saveForm = () => {
     localStorage.setItem("formFields", JSON.stringify(fields));
     alert("Форма сохранена!");
   };
 
-  // Добавление нового поля
+
   const addField = (type: Field["type"]) => {
     setFields([...fields, { id: Date.now().toString(), type, label: "Новое поле" }]);
   };
 
-  // Удаление поля
+
   const removeField = (id: string) => {
     setFields(fields.filter((field) => field.id !== id));
   };
 
-  // Обновление параметров поля
+
   const updateField = (id: string, key: keyof Field, value: any) => {
     setFields(fields.map((f) => (f.id === id ? { ...f, [key]: value } : f)));
   };
