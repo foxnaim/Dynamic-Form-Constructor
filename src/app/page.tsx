@@ -1,21 +1,17 @@
 "use client";
-import React, {useEffect} from "react";
+import React from "react";
 import FormBuilder from "@/app/components/FormBuilder/FormBuilder";
 import Link from "next/link";
 
 
 export default function Home() {
 
-  useEffect(() => {
-    console.log("Открываю:", window.location.pathname);
-  }, []);
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
       <h1 className="text-2xl font-bold mb-4">Конструктор форм</h1>
       <FormBuilder />
       
-      <Link href="/form/"   className="mt-4 text-blue-500 hover:underline text-lg"
+      <Link href="/form"   className="mt-4 text-blue-500 hover:underline text-lg"
       >
         Перейти к заполнению →
       </Link>

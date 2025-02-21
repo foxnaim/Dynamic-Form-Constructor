@@ -25,17 +25,35 @@ const FormRenderer = () => {
     if (savedFields) setFields(JSON.parse(savedFields));
   }, []);
 
+  // Формируем схему валидации динамически
   const validationSchema = z.object(
     fields.reduce((acc, field) => {
-      if (field.type === "email") acc[field.id] = z.string().email("Неверный email");
-      else if (field.type === "number") {
-        let rule = z.number();
-        if (field.min !== undefined) rule = rule.min(field.min, `Минимум ${field.min}`);
-        if (field.max !== undefined) rule = rule.max(field.max, `Максимум ${field.max}`);
+      if (field.type === "email") {
+        acc[field.id] = z.string().email("Неверный email");
+      } else if (field.type === "number") {
+        let rule = z.preprocess(
+          (val) => (val === "" ? undefined : Number(val)),
+          z.number({ invalid_type_error: "Введите число" })
+            .refine((val) => !isNaN(val), "Введите число") // Доп. проверка на NaN
+        );
+
+        if (typeof field.min === "number") {
+          rule = rule.refine((val) => val >= field.min!, `Минимум ${field.min}`);
+        }
+        if (typeof field.max === "number") {
+          rule = rule.refine((val) => val <= field.max!, `Максимум ${field.max}`);
+        }
+
         acc[field.id] = rule;
-      } else acc[field.id] = z.string().min(1, "Поле обязательно");
+      } else if (field.type === "checkbox") {
+        acc[field.id] = z.boolean().default(false);
+      } else if (field.type === "select" && field.options && field.options.length > 0) {
+        acc[field.id] = z.enum([field.options[0], ...field.options.slice(1)]);
+      } else {
+        acc[field.id] = z.string().min(1, "Поле обязательно");
+      }
       return acc;
-    }, {} as any)
+    }, {} as Record<string, z.ZodTypeAny>)
   );
 
   const {
@@ -44,6 +62,12 @@ const FormRenderer = () => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(validationSchema),
+    defaultValues: fields.reduce((acc, field) => {
+      if (field.type === "checkbox") {
+        acc[field.id] = false;
+      }
+      return acc;
+    }, {} as Record<string, any>),
   });
 
   const onSubmit = (data: any) => {
@@ -60,16 +84,26 @@ const FormRenderer = () => {
         {fields.map((field) => (
           <div key={field.id} className="flex flex-col">
             <label className="font-medium">{field.label}</label>
+
             {field.type === "checkbox" ? (
               <input type="checkbox" {...register(field.id)} className="mt-1" />
+            ) : field.type === "select" && field.options ? (
+              <select {...register(field.id)} className="p-2 border rounded">
+                {field.options.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
             ) : (
               <input
                 type={field.type}
-                {...register(field.id)}
+                {...register(field.id, field.type === "number" ? { valueAsNumber: true } : {})}
                 placeholder={field.type === "text" ? "Введите текст" : ""}
                 className="p-2 border rounded"
               />
             )}
+
             {errors[field.id] && (
               <p className="text-red-500 text-sm">{(errors as any)[field.id]?.message}</p>
             )}

@@ -29,7 +29,7 @@ const FormBuilder = () => {
   };
 
   const addField = (type: Field["type"]) => {
-    setFields([...fields, { id: Date.now().toString(), type, label: "Новое поле" }]);
+    setFields([...fields, { id: Date.now().toString(), type, label: "Новое поле", options: type === "select" ? ["Опция 1"] : undefined }]);
     toast.info(`Добавлено поле: ${type}`, { autoClose: 1500 });
   };
 
@@ -79,6 +79,43 @@ const FormBuilder = () => {
             <div className="flex gap-2">
               <input type="number" className="w-1/2 p-2 border rounded" placeholder="min" onChange={(e) => updateField(field.id, "min", Number(e.target.value))} />
               <input type="number" className="w-1/2 p-2 border rounded" placeholder="max" onChange={(e) => updateField(field.id, "max", Number(e.target.value))} />
+            </div>
+          )}
+          {field.type === "select" && (
+            <div className="mt-2">
+              {field.options?.map((option, index) => (
+                <div key={index} className="flex gap-2 items-center mb-1">
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded"
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...(field.options || [])];
+                      newOptions[index] = e.target.value;
+                      updateField(field.id, "options", newOptions);
+                    }}
+                  />
+                  <button
+                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    onClick={() => {
+                      const newOptions = field.options?.filter((_, i) => i !== index);
+                      updateField(field.id, "options", newOptions);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={() => {
+                  const newOptions = [...(field.options ?? []), `Опция ${(field.options?.length ?? 0) + 1}`];
+                  updateField(field.id, "options", newOptions);
+                }}
+                
+              >
+                Добавить опцию
+              </button>
             </div>
           )}
           <button className="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition" onClick={() => removeField(field.id)}>
