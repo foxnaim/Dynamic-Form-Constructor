@@ -1,13 +1,12 @@
 import React from 'react'
-import FormBuilder from './components/FormBuilder/FormBuilder'
+import App from './pages/Home/page'
+
 
 
 
 const Home = () => {
   return (
-    <div>
-      <FormBuilder/>
-    </div>
+    <App/>
   )
 }
 
